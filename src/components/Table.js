@@ -54,7 +54,6 @@ class Table {
 
     this.orders.forEach(field => {
       let row = this.generateRow(field);
-      debugger
       box.append(row);
     });
 
