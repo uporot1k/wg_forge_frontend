@@ -1,8 +1,11 @@
-// this is an example of improting data from JSON
-import 'orders' from '../data/orders.json';
+import fetchData from './api/fetchData';
+import Table from './components/Table'
 
-export default (function () {
+export default (async function () {
     // YOUR CODE GOES HERE
     // next line is for example only
+    let test = await fetchData('orders');
+    let table = new Table();
+    
     document.getElementById("app").innerHTML = "<h1>Hello WG Forge</h1>";
 }());
