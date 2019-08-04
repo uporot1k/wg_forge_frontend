@@ -1,33 +1,32 @@
 import fetchData from '../api/fetchData';
-import * as utils from '../helpers/util';
+
 class Table {
-  constructor () {
-    this.fields = [
-      'Transaction ID',
-      'User Info',
-      'Order Date',
-      'Order Amount',
-      'Card Number',
-      'Card Type',
-      'Location',
-    ];
-    this.orders = [];
+  constructor (obj) {
+    this.header = obj.header;
+    this.fields = {};
+    this.orders = obj.data;
+    this.adapter = obj.adapter;     
     this.currency = 'USD';
+    this.rows = [];
   this.init();
   }
   async init() {
-    this.orders = await fetchData('orders');
-    if (this.orders) {
+
+      if (typeof this.adapter == 'function') {
+        this.orders = this.adapter(this.orders);
+
+      }
+
       const head = this.generateHead();
       const body = this.generateBody();
-      
+
       let table = document.createElement('table');
       table.append(head);
       table.append(body);
-      console.log(table);
-      document.getElementById('app').append(table);
-    }
 
+      document.getElementById('app').append(table);
+    
+      this.fillUsersCell();
    
   }
   generateHead() {
@@ -35,9 +34,9 @@ class Table {
     let fragment = document.createDocumentFragment();
     let row = document.createElement('tr');
 
-    this.fields.forEach(field => {
+    this.header.forEach(item => {
       let cell = document.createElement('th');
-      cell.textContent = field;
+      cell.textContent = item.title;
 
       row.append(cell);
     });
@@ -63,12 +62,20 @@ class Table {
     return tBody;
   }
   generateRow(data) {
-    let rowData = this.prepeareDataForRow(data);
-    let box = document.createElement('tr');
+    const rowData = data;
 
+    let row = this.drawRowTemplate(rowData);
+    this.rows.push(row);
+
+    return row;
+  }
+  drawRowTemplate(data) {
+    const rowData = data;
+    
+    let box = document.createElement('tr');
     box.id = `order_${rowData.id}`;
 
-    let template = `
+    const template = `
       <td>${rowData.transaction_id}</td>
       <td class='user-data'>${rowData.user_id}</td>
       <td>${rowData.created_at}</td>
@@ -79,25 +86,21 @@ class Table {
     `;
 
     box.innerHTML = template;
-    
+
     return box;
   }
-  prepeareDataForRow(data) {
-    let dataObj = data;
-    let rowData = {};
+  fillUsersCell() {
+    const users = this.users;
 
-    rowData.id = data.id;
-    rowData.transaction_id = dataObj.transaction_id;
-    rowData.user_id = dataObj.user_id;
-    rowData.created_at = new Date(dataObj.created_at).toLocaleString('en');
-    rowData.total = utils.getTotal(this.currency, dataObj.total);
-    rowData.card_number = utils.getConvertedNumber(dataObj.card_number);
-    rowData.card_type = dataObj.card_type;
-    rowData.location = `${dataObj.order_country} ${dataObj.order_ip}`;
-    
-    return rowData;
+    this.rows.forEach(row => {
+      const userCell = row.querySelector('.user-data');
+      const userId = userCell.textContent;
+      this.drawUserCell(userCell);
+    });
   }
+  drawUserCell (data) {
 
+  }
 }
 
 export default Table;
