@@ -9,3 +9,10 @@ export function getConvertedNumber (str) {
   let newStr = str.slice(0, 2) + '*'.repeat(strLen - 6) + str.slice(-4);
   return newStr;
 }
+
+export function getFullNameWithPrefix (str, firstName, lastName) {
+  let prefix = str === 'Male' ? 'Mr.' : 'Ms.';
+  const fullName = `${prefix} ${firstName} ${lastName}`;
+  
+  return fullName;
+}

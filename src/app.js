@@ -7,12 +7,12 @@ export default (async function () {
     const adapter = new Adapter();
 
     const tableHeader = tableSchema;
-    const tableData = await fetchData('orders');
-
+    const orders = await fetchData('orders');
+    
     let table = new Table({
       el: '#app',
       header: tableHeader,
-      data: tableData,
+      data: orders,
       adapter: adapter.convertDataForTable,
     });
     

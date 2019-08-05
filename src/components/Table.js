@@ -1,10 +1,12 @@
 import fetchData from '../api/fetchData';
-
+import * as utils from '../helpers/util'
 class Table {
   constructor (obj) {
     this.header = obj.header;
     this.fields = {};
     this.orders = obj.data;
+    this.users = [];
+    this.usersCells = [];
     this.adapter = obj.adapter;     
     this.currency = 'USD';
     this.rows = [];
@@ -19,15 +21,14 @@ class Table {
 
       const head = this.generateHead();
       const body = this.generateBody();
+      await this.fillUsersCell();
 
       let table = document.createElement('table');
       table.append(head);
       table.append(body);
 
       document.getElementById('app').append(table);
-    
-      this.fillUsersCell();
-   
+     console.log(this)
   }
   generateHead() {
     let tHead = document.createElement('thead');
@@ -59,6 +60,8 @@ class Table {
     fragment.append(box);
     tBody.append(fragment);
 
+    
+
     return tBody;
   }
   generateRow(data) {
@@ -89,17 +92,44 @@ class Table {
 
     return box;
   }
-  fillUsersCell() {
-    const users = this.users;
+  async fillUsersCell() {
+    const users = await fetchData('users');
+    const company = await fetchData('companies');
+    this.users = [...users];
 
-    this.rows.forEach(row => {
-      const userCell = row.querySelector('.user-data');
-      const userId = userCell.textContent;
-      this.drawUserCell(userCell);
+    users.forEach(user => {
+      const userCell = this.getUserCellById(user.id);
+
+      const userId = +userCell.textContent;
+      const userData = users.find(user => user.id == userId);
+      
+      if (userData) {
+        this.drawUserCell(userCell, userData, userId);
+      }
+
+      if (userData.company) {
+        this.draw
+      }
+
     });
   }
-  drawUserCell (data) {
+  drawUserCell (cell, data, id) {
+   
+    const userId = id;
+    cell.parentNode.id = `user_id-${userId}`;
 
+    let cellLink = document.createElement('a');
+    cellLink.setAttribute('href', '#');
+
+    const name = utils.getFullNameWithPrefix(data.gender, data.first_name, data.last_name);
+    cellLink.textContent = name;
+
+    cell.innerHTML = cellLink.outerHTML;
+  }
+  getUserCellById(id) {
+    let el = this.rows.find(row => row.querySelector('.user-data').textContent == id);
+
+    return el.querySelector('.user-data');
   }
 }
 
